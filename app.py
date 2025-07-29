@@ -22,14 +22,11 @@ def init_db():
                    (license_key TEXT PRIMARY KEY, expiry_date TEXT, active INTEGER, buyer_name TEXT)''')
     cur.execute('''CREATE TABLE IF NOT EXISTS users
                    (username TEXT PRIMARY KEY, password TEXT)''')
-    # اضافه کردن کاربر پیش‌فرض (رمز: admin123)
-    hashed_password = hashlib.sha256("KMA123".encode()).hexdigest()
-    cur.execute("INSERT OR IGNORE INTO users (username, password) VALUES (%s, %s)", ('amirkma', hashed_password))
+    hashed_password = hashlib.sha256("amirkma123".encode()).hexdigest()  # یا رمز دلخواه
+    cur.execute("INSERT INTO users (username, password) VALUES (%s, %s) ON CONFLICT DO NOTHING", ('amirkma', hashed_password))
     conn.commit()
     cur.close()
     conn.close()
-
-# فراخوانی init_db در شروع برنامه
 init_db()
 
 # سایر توابع (login, dashboard, validate_license) رو با get_db_connection به‌روز کن
