@@ -3,9 +3,10 @@ import os
 import hashlib
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session
+import secrets
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'your_default_secret_key')  # متغیر محیطی
+app.secret_key = os.environ.get('SECRET_KEY', 'your_default_secret_key')
 
 # تابع اتصال به دیتابیس
 def get_db_connection():
@@ -56,7 +57,11 @@ def dashboard():
     if request.method == 'POST':
         if 'generate' in request.form:
             license_key = secrets.token_hex(16)
-            expiry_days = int(request.form['expiry_days'])
+            expiry_days = request.form.get('expiry_days', '30')
+            try:
+                expiry_days = int(expiry_days)
+            except ValueError:
+                expiry_days = 30
             expiry_date = (datetime.now() + timedelta(days=expiry_days)).strftime('%Y-%m-%d')
             buyer_name = request.form.get('buyer_name', 'Unknown')
             cur.execute("INSERT INTO licenses (license_key, expiry_date, active, buyer_name) VALUES (%s, %s, %s, %s)",
@@ -78,4 +83,3 @@ def dashboard():
     cur.close()
     conn.close()
     return render_template('dashboard.html', licenses=licenses)
-# سایر روت‌ها (مثل login و validate_license) هم همین‌طور به‌روز کن
