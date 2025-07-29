@@ -23,8 +23,8 @@ def init_db():
     cur.execute('''CREATE TABLE IF NOT EXISTS users
                    (username TEXT PRIMARY KEY, password TEXT)''')
     # اضافه کردن کاربر پیش‌فرض (رمز: admin123)
-    hashed_password = hashlib.sha256("admin123".encode()).hexdigest()
-    cur.execute("INSERT OR IGNORE INTO users (username, password) VALUES (%s, %s)", ('admin', hashed_password))
+    hashed_password = hashlib.sha256("KMA123".encode()).hexdigest()
+    cur.execute("INSERT OR IGNORE INTO users (username, password) VALUES (%s, %s)", ('amirkma', hashed_password))
     conn.commit()
     cur.close()
     conn.close()
