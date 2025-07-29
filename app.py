@@ -29,24 +29,6 @@ def init_db():
     cur.close()
     conn.close()
 init_db()
-@app.route('/check_license', methods=['POST'])
-def check_license():
-    license_key = request.form.get('license_key')
-    if not license_key:
-        return jsonify({'valid': False, 'message': 'No license key provided'}), 400
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT expiry_date, active FROM licenses WHERE license_key = %s", (license_key,))
-    license_data = cur.fetchone()
-    cur.close()
-    conn.close()
-    if license_data:
-        expiry_date, active = license_data
-        if active == 1 and datetime.now().strftime('%Y-%m-%d') <= expiry_date:
-            return jsonify({'valid': True, 'expiry_date': expiry_date, 'message': 'License is valid'}), 200
-        else:
-            return jsonify({'valid': False, 'message': 'License expired or inactive'}), 403
-    return jsonify({'valid': False, 'message': 'Invalid license key'}), 404
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -101,3 +83,21 @@ def dashboard():
     cur.close()
     conn.close()
     return render_template('dashboard.html', licenses=licenses)
+@app.route('/check_license', methods=['POST'])
+def check_license():
+    license_key = request.form.get('license_key')
+    if not license_key:
+        return jsonify({'valid': False, 'message': 'No license key provided'}), 400
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT expiry_date, active FROM licenses WHERE license_key = %s", (license_key,))
+    license_data = cur.fetchone()
+    cur.close()
+    conn.close()
+    if license_data:
+        expiry_date, active = license_data
+        if active == 1 and datetime.now().strftime('%Y-%m-%d') <= expiry_date:
+            return jsonify({'valid': True, 'expiry_date': expiry_date, 'message': 'License is valid'}), 200
+        else:
+            return jsonify({'valid': False, 'message': 'License expired or inactive'}), 403
+    return jsonify({'valid': False, 'message': 'Invalid license key'}), 404
