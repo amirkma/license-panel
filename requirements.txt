@@ -1,7 +1,4 @@
 Flask
 gunicorn
 psycopg2-binary
-secrets==1.0.2
-db-sqlite3==0.0.1
-DateTime==5.5
-Flask==3.1.1
+
