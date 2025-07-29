@@ -28,7 +28,23 @@ def init_db():
     cur.close()
     conn.close()
 init_db()
-
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username, hashed_password))
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+        if user:
+            session['logged_in'] = True
+            return redirect(url_for('dashboard'))
+        return render_template('login.html', error="نام کاربری یا رمز عبور اشتباه است")
+    return render_template('login.html')
 # سایر توابع (login, dashboard, validate_license) رو با get_db_connection به‌روز کن
 # مثلاً تابع dashboard:
 @app.route('/dashboard', methods=['GET', 'POST'])
