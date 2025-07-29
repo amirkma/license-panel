@@ -78,5 +78,4 @@ def dashboard():
     cur.close()
     conn.close()
     return render_template('dashboard.html', licenses=licenses)
-
 # سایر روت‌ها (مثل login و validate_license) هم همین‌طور به‌روز کن
