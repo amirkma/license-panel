@@ -23,8 +23,14 @@ def get_db_connection():
 def init_db():
     conn = get_db_connection()
     cur = conn.cursor()
+    # ایجاد جدول اگه وجود نداشته باشه
     cur.execute('''CREATE TABLE IF NOT EXISTS licenses
-                   (license_key TEXT PRIMARY KEY, expiry_date TEXT, active INTEGER, buyer_name TEXT, max_devices INTEGER, active_devices INTEGER, device_ids TEXT)''')
+                   (license_key TEXT PRIMARY KEY, expiry_date TEXT, active INTEGER, buyer_name TEXT)''')
+    # اضافه کردن ستون‌های جدید اگه وجود نداشته باشن
+    cur.execute("ALTER TABLE licenses ADD COLUMN IF NOT EXISTS max_devices INTEGER")
+    cur.execute("ALTER TABLE licenses ADD COLUMN IF NOT EXISTS active_devices INTEGER")
+    cur.execute("ALTER TABLE licenses ADD COLUMN IF NOT EXISTS device_ids TEXT")
+    # ایجاد جدول users
     cur.execute('''CREATE TABLE IF NOT EXISTS users
                    (username TEXT PRIMARY KEY, password TEXT)''')
     hashed_password = hashlib.sha256("amirkma123".encode()).hexdigest()
@@ -41,19 +47,19 @@ def login():
         username = request.form['username']
         password = request.form['password']
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
-        print(f"Attempting login for username: {username}, hashed password: {hashed_password}")  # دیباگ
+        print(f"Attempting login for username: {username}, hashed password: {hashed_password}")
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username, hashed_password))
         user = cur.fetchone()
-        print(f"Database query result: {user}")  # دیباگ
+        print(f"Database query result: {user}")
         cur.close()
         conn.close()
         if user:
             session['logged_in'] = True
-            print("Login successful")  # دیباگ
+            print("Login successful")
             return redirect(url_for('dashboard'))
-        print("Login failed")  # دیباگ
+        print("Login failed")
         return render_template('login.html', error="نام کاربری یا رمز عبور اشتباه است")
     return render_template('login.html')
 
