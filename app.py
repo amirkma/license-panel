@@ -12,7 +12,11 @@ app.secret_key = os.environ.get('SECRET_KEY', 'your_default_secret_key')
 def get_db_connection():
     url = os.environ.get('DATABASE_URL')
     if url:
-        return psycopg2.connect(url)
+        try:
+            return psycopg2.connect(url)
+        except psycopg2.Error as e:
+            print(f"Database connection error: {e}")
+            raise
     raise Exception("DATABASE_URL not set")
 
 # تنظیم اولیه دیتابیس
@@ -37,15 +41,19 @@ def login():
         username = request.form['username']
         password = request.form['password']
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        print(f"Attempting login for username: {username}, hashed password: {hashed_password}")  # دیباگ
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username, hashed_password))
         user = cur.fetchone()
+        print(f"Database query result: {user}")  # دیباگ
         cur.close()
         conn.close()
         if user:
             session['logged_in'] = True
+            print("Login successful")  # دیباگ
             return redirect(url_for('dashboard'))
+        print("Login failed")  # دیباگ
         return render_template('login.html', error="نام کاربری یا رمز عبور اشتباه است")
     return render_template('login.html')
 
