@@ -48,12 +48,13 @@
             100% { box-shadow: 0 0 10px #00c4cc; }
         }
         .main-text { font-size: 2em; font-weight: bold; margin: 0; background: #00c4cc; -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .summary { font-size: 1.2em; margin: 10px 0; background: #00c4cc; -webkit-background-clip: text; background-clip: text; color: transparent; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #00c4cc; padding: 10px; text-align: center; }
         th { background-color: rgba(0, 0, 0, 0.7); }
-        .form-group { margin: 20px 0; display: flex; align-items: center; justify-content: center; }
-        .form-group input { padding: 10px; margin-left: 10px; border: 2px solid #00c4cc; border-radius: 25px; background: rgba(0, 0, 0, 0.3); color: #fff; }
-        .action-btn { background: linear-gradient(45deg, #00c4cc, #0077b6); color: #fff; padding: 10px 20px; border: none; border-radius: 25px; text-decoration: none; margin: 10px; font-weight: bold; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .form-group { margin: 20px 0; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; }
+        .form-group input { padding: 10px; margin: 5px; border: 2px solid #00c4cc; border-radius: 25px; background: rgba(0, 0, 0, 0.3); color: #fff; }
+        .action-btn { background: linear-gradient(45deg, #00c4cc, #0077b6); color: #fff; padding: 10px 20px; border: none; border-radius: 25px; text-decoration: none; margin: 5px; font-weight: bold; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .action-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px #00c4cc; }
         .footer { background-color: rgba(0, 0, 0, 0.9); padding: 20px; text-align: center; width: 100%; margin-top: auto; }
         .footer p { margin: 5px 0; font-size: 0.9em; }
@@ -70,8 +71,12 @@
     <main class="main-content">
         <div class="custom-frame">
             <h1 class="main-text">Dashboard</h1>
+            <div class="summary">
+                Total Active Devices: {{ active_devices }}
+            </div>
             <form method="post" class="form-group">
                 <input type="number" name="expiry_days" placeholder="Expiry Days" required>
+                <input type="number" name="max_devices" placeholder="Max Devices" required min="1">
                 <input type="text" name="buyer_name" placeholder="Buyer Name" required>
                 <button type="submit" name="generate" class="action-btn">Generate License</button>
             </form>
@@ -80,6 +85,9 @@
                     <th>License Key</th>
                     <th>Expiry Date</th>
                     <th>Buyer Name</th>
+                    <th>Device ID</th>
+                    <th>Max Devices</th>
+                    <th>Active Devices</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -88,11 +96,18 @@
                     <td>{{ license[0] }}</td>
                     <td>{{ license[1] }}</td>
                     <td>{{ license[3] if license[3] else 'Unknown' }}</td>
+                    <td>{{ license[4] if license[4] else 'Not Assigned' }}</td>
+                    <td>{{ license[5] }}</td>
+                    <td>{{ license[6] }}</td>
                     <td>{{ 'Active' if license[2] else 'Inactive' }}</td>
                     <td>
                         <form method="post" style="display:inline;">
                             <input type="hidden" name="license_key" value="{{ license[0] }}">
                             <button type="submit" name="toggle_active" class="action-btn">{{ 'Deactivate' if license[2] else 'Activate' }}</button>
+                        </form>
+                        <form method="post" style="display:inline;">
+                            <input type="hidden" name="license_key" value="{{ license[0] }}">
+                            <button type="submit" name="reset_devices" class="action-btn">Reset Devices</button>
                         </form>
                         <form method="post" style="display:inline;">
                             <input type="hidden" name="license_key" value="{{ license[0] }}">
@@ -156,3 +171,5 @@
             connectParticles(); requestAnimationFrame(animate);
         } animate();
     </script>
+</body>
+</html>
