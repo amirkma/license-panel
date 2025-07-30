@@ -23,14 +23,8 @@ def get_db_connection():
 def init_db():
     conn = get_db_connection()
     cur = conn.cursor()
-    # ایجاد جدول اگه وجود نداشته باشه
     cur.execute('''CREATE TABLE IF NOT EXISTS licenses
-                   (license_key TEXT PRIMARY KEY, expiry_date TEXT, active INTEGER, buyer_name TEXT)''')
-    # اضافه کردن ستون‌های جدید اگه وجود نداشته باشن
-    cur.execute("ALTER TABLE licenses ADD COLUMN IF NOT EXISTS max_devices INTEGER")
-    cur.execute("ALTER TABLE licenses ADD COLUMN IF NOT EXISTS active_devices INTEGER")
-    cur.execute("ALTER TABLE licenses ADD COLUMN IF NOT EXISTS device_ids TEXT")
-    # ایجاد جدول users
+                   (license_key TEXT PRIMARY KEY, expiry_date TEXT, active INTEGER, buyer_name TEXT, max_devices INTEGER, active_devices INTEGER, device_ids TEXT)''')
     cur.execute('''CREATE TABLE IF NOT EXISTS users
                    (username TEXT PRIMARY KEY, password TEXT)''')
     hashed_password = hashlib.sha256("amirkma123".encode()).hexdigest()
@@ -82,8 +76,17 @@ def dashboard():
                 max_devices = 1
             expiry_date = (datetime.now() + timedelta(days=expiry_days)).strftime('%Y-%m-%d')
             buyer_name = request.form.get('buyer_name', 'Unknown')
-            cur.execute("INSERT INTO licenses (license_key, expiry_date, active, buyer_name, max_devices, active_devices, device_ids) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                        (license_key, expiry_date, 1, buyer_name, max_devices, 0, ''))
+            # چک کردن اگه لایسنس با همون buyer_name وجود داره
+            cur.execute("SELECT license_key, max_devices FROM licenses WHERE buyer_name = %s AND active = 1", (buyer_name,))
+            existing_license = cur.fetchone()
+            if existing_license:
+                old_license_key, current_max_devices = existing_license
+                new_max_devices = max(current_max_devices, max_devices)  # حداکثر فعلی رو نگه می‌داره یا آپدیت می‌کنه
+                cur.execute("UPDATE licenses SET max_devices = %s, expiry_date = %s WHERE license_key = %s",
+                           (new_max_devices, expiry_date, old_license_key))
+            else:
+                cur.execute("INSERT INTO licenses (license_key, expiry_date, active, buyer_name, max_devices, active_devices, device_ids) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                           (license_key, expiry_date, 1, buyer_name, max_devices, 0, ''))
             conn.commit()
         elif 'toggle_active' in request.form:
             license_key = request.form['license_key']
@@ -130,7 +133,7 @@ def check_license():
                     conn = get_db_connection()
                     cur = conn.cursor()
                     cur.execute("UPDATE licenses SET device_ids = %s, active_devices = %s WHERE license_key = %s",
-                                (','.join(device_ids), active_devices, license_key))
+                               (','.join(device_ids), active_devices, license_key))
                     conn.commit()
                     cur.close()
                     conn.close()
