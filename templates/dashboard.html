@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
     <link rel="icon" href="https://uploadkon.ir/uploads/bf1625_25Screenshot-2024-03-04-150309.png">
     <style>
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; color: #fff;
             overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh;
@@ -33,13 +33,10 @@
             66% { text-shadow: 0 0 10px white; }
             100% { text-shadow: 0 0 10px turquoise; }
         }
-        .nav { display: flex; align-items: center; }
-        .nav a { color: #fff; text-decoration: none; margin: 0 15px; font-size: 1em; transition: color 0.3s ease; }
-        .nav a:hover { color: #00c4cc; }
         .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         .custom-frame {
             background-color: rgba(0, 0, 0, 0.5); padding: 25px; border: 2px solid #00c4cc; border-radius: 10px;
-            width: 90%; max-width: 800px; margin: 0 auto; text-align: center; box-shadow: 0 0 20px #00c4cc;
+            width: 90%; max-width: 900px; margin: 0 auto; text-align: center; box-shadow: 0 0 20px #00c4cc;
             animation: pulse 4s ease-in-out infinite;
         }
         @keyframes pulse {
@@ -49,14 +46,35 @@
         }
         .main-text { font-size: 2em; font-weight: bold; margin: 0; background: #00c4cc; -webkit-background-clip: text; background-clip: text; color: transparent; }
         .summary { font-size: 1.2em; margin: 10px 0; background: #00c4cc; -webkit-background-clip: text; background-clip: text; color: transparent; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #00c4cc; padding: 10px; text-align: center; }
+        .form-group {
+            margin: 20px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+        }
+        .form-group input {
+            padding: 10px; margin: 5px; border: 2px solid #00c4cc; border-radius: 25px;
+            background: rgba(0, 0, 0, 0.3); color: #fff; width: 120px;
+        }
+        table {
+            width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid #00c4cc; padding: 10px; text-align: center; word-wrap: break-word;
+        }
         th { background-color: rgba(0, 0, 0, 0.7); }
-        .form-group { margin: 20px 0; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; }
-        .form-group input { padding: 10px; margin: 5px; border: 2px solid #00c4cc; border-radius: 25px; background: rgba(0, 0, 0, 0.3); color: #fff; }
-        .action-btn { background: linear-gradient(45deg, #00c4cc, #0077b6); color: #fff; padding: 10px 20px; border: none; border-radius: 25px; text-decoration: none; margin: 5px; font-weight: bold; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .action-btn {
+            background: linear-gradient(45deg, #00c4cc, #0077b6); color: #fff; padding: 5px 10px;
+            border: none; border-radius: 25px; text-decoration: none; margin: 2px; font-weight: bold;
+            cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
         .action-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px #00c4cc; }
-        .footer { background-color: rgba(0, 0, 0, 0.9); padding: 20px; text-align: center; width: 100%; margin-top: auto; }
+        .copy-btn {
+            background: linear-gradient(45deg, #ffcc00, #ff6600); padding: 5px 10px;
+            border: none; border-radius: 25px; cursor: pointer; transition: transform 0.3s ease;
+        }
+        .copy-btn:hover { transform: scale(1.05); }
+        .footer {
+            background-color: rgba(0, 0, 0, 0.9); padding: 20px; text-align: center; width: 100%;
+            margin-top: auto;
+        }
         .footer p { margin: 5px 0; font-size: 0.9em; }
     </style>
 </head>
@@ -113,6 +131,7 @@
                             <input type="hidden" name="license_key" value="{{ license[0] }}">
                             <button type="submit" name="delete" class="action-btn">Delete</button>
                         </form>
+                        <button class="copy-btn" onclick="copyToClipboard('{{ license[0] }}')">Copy</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -170,6 +189,15 @@
             for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); particlesArray[i].draw(); }
             connectParticles(); requestAnimationFrame(animate);
         } animate();
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('License key copied to clipboard!');
+            }).catch(err => {
+                alert('Failed to copy license key.');
+                console.error('Copy error: ', err);
+            });
+        }
     </script>
 </body>
 </html>
